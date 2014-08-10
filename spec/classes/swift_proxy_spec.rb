@@ -63,18 +63,15 @@ describe 'swift::proxy' do
             'bind_port = 8080',
             "workers = #{facts[:processorcount]}",
             'user = swift',
+            'log_headers = false',
             'log_name = swift',
             'log_level = INFO',
-            'log_headers = False',
             'log_address = /dev/log',
             '[pipeline:main]',
             'pipeline = healthcheck cache tempauth proxy-server',
             '[app:proxy-server]',
             'use = egg:swift#proxy',
             'set log_name = proxy-server',
-            'set log_facility = LOG_LOCAL1',
-            'set log_level = INFO',
-            'set log_address = /dev/log',
             'log_handoffs = true',
             'allow_account_management = true',
             'account_autocreate = true'
@@ -127,6 +124,34 @@ describe 'swift::proxy' do
         it { should contain_concat__fragment('swift_proxy').with_before(
           'Class[Swift::Proxy::Swauth]'
         )}
+      end
+
+      describe "when log_statsd settings are set" do
+        let :params do
+          {
+            :proxy_local_net_ip        => '10.0.0.2',
+            :log_statsd_host                => 'localhost',
+            :log_statsd_port                => 1234,
+            :log_statsd_default_sample_rate => '0.9',
+            :log_statsd_sample_rate_factor  => '0.9',
+            :log_statsd_metric_prefix       => 'this.is.a.test',
+          }
+        end
+        it { should contain_file(fragment_path) \
+          .with_content(/^log_statsd_host\s*=\s*localhost\s*$/)
+        }
+        it { should contain_file(fragment_path) \
+          .with_content(/^log_statsd_port\s*=\s*1234\s*$/)
+        }
+        it { should contain_file(fragment_path) \
+          .with_content(/^log_statsd_default_sample_rate\s*=\s*0.9\s*$/)
+        }
+        it { should contain_file(fragment_path) \
+          .with_content(/^log_statsd_sample_rate_factor\s*=\s*0.9\s*$/)
+        }
+        it { should contain_file(fragment_path) \
+          .with_content(/^log_statsd_metric_prefix\s*=\s*this\.is\.a\.test\s*$/)
+        }
       end
 
       describe 'when supplying bad values for parameters' do

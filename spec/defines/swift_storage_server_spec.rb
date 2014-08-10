@@ -63,11 +63,14 @@ describe 'swift::storage::server' do
 
       describe 'when parameters are overridden' do
         {
-          :devices     => '/tmp/foo',
-          :user        => 'dan',
-          :mount_check => true,
-          :workers     => 7,
-          :pipeline    => ['foo']
+          :devices                        => '/tmp/foo',
+          :user                           => 'dan',
+          :mount_check                    => true,
+          :workers                        => 7,
+          :pipeline                       => ['foo'],
+          :log_facility                   => 'LOG_LOCAL1',
+          :log_level                      => 'DEBUG',
+          :log_address                    => '/dev/null',
         }.each do |k,v|
           describe "when #{k} is set" do
             let :params do req_params.merge({k => v}) end
@@ -98,6 +101,34 @@ describe 'swift::storage::server' do
             .with_content(/\[#{t}-replicator\]\nconcurrency\s*=\s*42\s*$/m)
           }
         end
+
+        describe "when log_statsd settings are set" do
+          let :params do
+            req_params.merge({
+              :log_statsd_host                => 'localhost',
+              :log_statsd_port                => 1234,
+              :log_statsd_default_sample_rate => '0.9',
+              :log_statsd_sample_rate_factor  => '0.9',
+              :log_statsd_metric_prefix       => 'this.is.a.test',
+            })
+          end
+          it { should contain_file(fragment_file) \
+            .with_content(/^log_statsd_host\s*=\s*localhost\s*$/)
+          }
+          it { should contain_file(fragment_file) \
+            .with_content(/^log_statsd_port\s*=\s*1234\s*$/)
+          }
+          it { should contain_file(fragment_file) \
+            .with_content(/^log_statsd_default_sample_rate\s*=\s*0.9\s*$/)
+          }
+          it { should contain_file(fragment_file) \
+            .with_content(/^log_statsd_sample_rate_factor\s*=\s*0.9\s*$/)
+          }
+          it { should contain_file(fragment_file) \
+            .with_content(/^log_statsd_metric_prefix\s*=\s*this\.is\.a\.test\s*$/)
+          }
+        end
+
         if t != 'account'
           describe "when updater_concurrency is set" do
             let :params do req_params.merge({:updater_concurrency => 73}) end
@@ -152,13 +183,13 @@ describe 'swift::storage::server' do
           .with_content(/^user\s*=\s*swift\s*$/)
         }
         it { should contain_file(fragment_file) \
-          .with_content(/^set log_facility\s*=\s*LOG_LOCAL2\s*$/)
+          .with_content(/^log_facility\s*=\s*LOG_LOCAL2\s*$/)
         }
         it { should contain_file(fragment_file) \
-          .with_content(/^set log_level\s*=\s*INFO\s*$/)
+          .with_content(/^log_level\s*=\s*INFO\s*$/)
         }
         it { should contain_file(fragment_file) \
-          .with_content(/^set log_address\s*=\s*\/dev\/log\s*$/)
+          .with_content(/^log_address\s*=\s*\/dev\/log\s*$/)
         }
         it { should contain_file(fragment_file) \
           .with_content(/^workers\s*=\s*1\s*$/)
