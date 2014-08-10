@@ -6,25 +6,33 @@
 define swift::storage::server(
   $type,
   $storage_local_net_ip,
-  $devices                = '/srv/node',
-  $owner                  = 'swift',
-  $group                  = 'swift',
-  $max_connections        = 25,
-  $pipeline               = ["${type}-server"],
-  $mount_check            = false,
-  $user                   = 'swift',
-  $workers                = '1',
-  $allow_versions         = false,
-  $replicator_concurrency = $::processorcount,
-  $updater_concurrency    = $::processorcount,
-  $reaper_concurrency     = $::processorcount,
-  $log_facility           = 'LOG_LOCAL2',
-  $log_level              = 'INFO',
-  $log_address            = '/dev/log',
+  $devices                        = '/srv/node',
+  $owner                          = 'swift',
+  $group                          = 'swift',
+  $max_connections                = 25,
+  $pipeline                       = ["${type}-server"],
+  $mount_check                    = false,
+  $user                           = 'swift',
+  $workers                        = '1',
+  $allow_versions                 = false,
+  $replicator_concurrency         = $::processorcount,
+  $updater_concurrency            = $::processorcount,
+  $reaper_concurrency             = $::processorcount,
+  $log_facility                   = $::swift::logging::log_facility,
+  $log_level                      = $::swift::logging::log_level,
+  $log_address                    = $::swift::logging::log_address,
+  $log_max_line_length            = $::swift::logging::log_max_line_length,
+  $log_custom_handlers            = $::swift::logging::log_custom_handlers,
+  $log_udp_host                   = $::swift::logging::log_udp_host,
+  $log_udp_port                   = $::swift::logging::log_udp_port,
+  $log_statsd_host                = $::swift::logging::log_statsd_host,
+  $log_statsd_port                = $::swift::logging::log_statsd_port,
+  $log_statsd_default_sample_rate = $::swift::logging::log_statsd_default_sample_rate,
+  $log_statsd_sample_rate_factor  = $::swift::logging::log_statsd_sample_rate_factor,
+  $log_statsd_metric_prefix       = $::swift::logging::log_statsd_metric_prefix,
   # this parameters needs to be specified after type and name
-  $config_file_path       = "${type}-server/${name}.conf"
+  $config_file_path               = "${type}-server/${name}.conf"
 ) {
-
   # Warn if ${type-server} isn't included in the pipeline
   if is_array($pipeline) {
     if !member($pipeline, "${type}-server") {
@@ -42,6 +50,19 @@ define swift::storage::server(
   validate_array($pipeline)
   validate_bool($allow_versions)
   # TODO - validate that name is an integer
+
+  validate_string($log_facility)
+  validate_string($log_level)
+  validate_string($log_address)
+  validate_re($log_max_line_length, '^\d$')
+  validate_string($log_custom_handlers)
+  validate_string($log_udp_host)
+  validate_re($log_udp_port, '\d')
+  validate_string($log_statsd_host)
+  validate_re($log_statsd_port, '\d')
+  validate_re($log_statsd_default_sample_rate, '[\d\.]+')
+  validate_re($log_statsd_sample_rate_factor, '[\d\.]+')
+  validate_string($log_statsd_metric_prefix)
 
   $bind_port = $name
 

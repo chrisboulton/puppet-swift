@@ -43,7 +43,7 @@ describe 'swift::storage::all' do
       :container_pipeline => ["3", "4"],
       :account_pipeline => ["5", "6"],
       :allow_versions => true,
-      :log_facility => ['LOG_LOCAL2', 'LOG_LOCAL3'],
+      :log_facility => 'LOG_LOCAL2',
     }
   ].each do |param_set|
 

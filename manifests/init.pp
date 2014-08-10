@@ -26,6 +26,7 @@ class swift(
 ) {
 
   include swift::params
+  include swift::logging
 
   if !defined(Package['swift']) {
     package { 'swift':
