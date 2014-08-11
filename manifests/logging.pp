@@ -1,5 +1,4 @@
 class swift::logging(
-  $log_name                       = 'swift',
   $log_facility                   = 'LOG_LOCAL2',
   $log_level                      = 'INFO',
   $log_address                    = '/dev/log',
