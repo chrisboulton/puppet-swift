@@ -1,3 +1,7 @@
 [filter:proxy-logging]
 use = egg:swift#proxy_logging
-
+<% ['log_name', 'log_facility', 'log_level', 'log_address', 'log_udp_host', 'log_udp_port', 'log_headers', 'log_headers_only'].each do |k|
+	next if scope[k] == 'UNSET' %>
+access_<%= k %> = <%= (scope[k].is_a?(Array) ? scope[k].join(', ') : scope[k]) -%>
+<% end %>
+<%= "reveal_sensitive_prefix = #{@reveal_sensitive_prefix}" if @reveal_sensitive_prefix != 'UNSET' %>
